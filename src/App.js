@@ -1,5 +1,6 @@
 import React from 'react';
 import { Switch, Route } from "react-router-dom";
+import { connect } from "react-redux";
 
 import './App.css';
 
@@ -8,7 +9,7 @@ import ShopPage from "./pages/shop/shop.component";
 import Header from "./components/header/header.component";
 import SignInAndSigUpPage from "./pages/signin-and-signup/signin-and-signup.component";
 import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
-
+import { setCurrentUser } from "./redux/user/user.action";
 /* 
 const HatsPage = () => (
   <div>
@@ -17,39 +18,38 @@ const HatsPage = () => (
 ) */
 
 class App extends React.Component  {
-  constructor() {
+/*   constructor() {
     super();
     this.state = {
       currentUser : null
     };
-  }
+  } */
 
   unsubscribeFromAuth = null;
 
 componentDidMount() {
+const {setCurrentUser} = this.props;
+
   this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
 /*     this.setState({ currentUser : user }); */
     if(userAuth) {
       const userRef = await createUserProfileDocument(userAuth);
 
-      userRef.onSnapshot(snapShot => {
+      userRef.onSnapshot(snapShot => {  
         /* console.log("snapshot :",snapShot.data()); */
-        this.setState({
-          currentUser: {
+        setCurrentUser ({
             id : snapShot.id,
             ...snapShot.data()
-          }
-        }, () => {
-
-          console.log("this state is : ",this.state);
-        })
-      });
+          });
+        
+        });
+      };
 
 
-    }
-    this.setState({ currentUser : userAuth });
+      setCurrentUser(userAuth);
+    /* this.setState({ currentUser : userAuth }); */
 /*     createUserProfileDocument(user); */
-    console.log(this.state.currentUser)
+   /*  console.log(this.state.currentUser) */
   });
 }
 
@@ -60,7 +60,7 @@ componentWillUnmount() {
   render() {
     return (
       <div>
-        <Header currentUser={this.state.currentUser} />
+        <Header /* currentUser={this.state.currentUser} */ />
         <Switch>
           <Route exact path="/" component={HomePage} />
           <Route path="/shop" component={ShopPage} />
@@ -73,4 +73,8 @@ componentWillUnmount() {
 
 }
 
-export default App;
+const mapDispatchToProps = dispatch => ({
+  setCurrentUser: user => dispatch(setCurrentUser(user))
+});
+
+export default connect(null,mapDispatchToProps)(App);

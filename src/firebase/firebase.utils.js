@@ -7,7 +7,7 @@ import "firebase/auth";
 const secret=process.env.APIKEY; */
 
 const config = {
- 
+
   };
 
   export const createUserProfileDocument = async (userAuth, additionalData) => {
